@@ -11,24 +11,20 @@ export default class InitialService {
   }
 
   async getInterfaces(){
-    var getAllInterfaces = async (resolve, reject) =>{
-      log.debug('getting mikrotik interfaces ...')
-      let interfaces = await this.excuteApiCommand('/ip/address/print')
-      let parsed = api.parseItems(interfaces)
-      resolve(parsed)
-    }
-    return new Promise(getAllInterfaces)
+    return new Promise(async (resolve, reject)=>{
+      await this.getParsedData(resolve, reject, '/ip/address/print')
+    })
   }
   async getAllUsers(){
-    log.debug('getting all hotspot users ...')
-    var getAllUsers = async (resolve, reject) => {
-      let users = await this.excuteApiCommand('/ip/hotspot/user/print')
-      let parsed = api.parseItems(users)
-      resolve(parsed)
-    }
-    return new Promise(getAllUsers)
+    return new Promise(async (resolve, reject)=>{
+      await this.getParsedData(resolve, reject, '/ip/hotspot/user/print')
+    })
   }
-
+  async getParsedData(resolve, reject, command){
+    let data = await this.excuteApiCommand(command)
+    let parsed = api.parseItems(data)
+    resolve(parsed)
+  }
   async excuteApiCommand(command){
     var excute = (resolve, reject) => {
       this.server.connect((conn)=>{
