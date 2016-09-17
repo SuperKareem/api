@@ -7,23 +7,57 @@ export default class InitialService {
     let username = 'admin';
     let password = '00'
     this.server = api.getConnection(mikroIP, username, password)
-    log.debug('logged in .... connection established :) !!')
+    log.debug(' .... connection established :) !!')
   }
-
-  async getInterfaces(){
+  async excuteGetCommand(mainCommand, secondCommand){
     return new Promise(async (resolve, reject)=>{
-      await this.getParsedData(resolve, reject, '/ip/address/print')
+      await this.getParsedData(resolve, reject, mainCommand + secondCommand)
     })
   }
-  async getAllUsers(){
+  async excutePostCommand(mainCommand, secondCommand, data){
+    let command  = [
+      mainCommand+secondCommand,
+      ...data
+    ]
     return new Promise(async (resolve, reject)=>{
-      await this.getParsedData(resolve, reject, '/ip/hotspot/user/print')
+      await this.getParsedData(resolve, reject, command)
     })
   }
+  // async getInterfaces(){
+  //   return new Promise(async (resolve, reject)=>{
+  //     await this.getParsedData(resolve, reject, '/ip/address/print')
+  //   })
+  // }
+  // async getAllUsers(){
+  //   return new Promise(async (resolve, reject)=>{
+  //     await this.getParsedData(resolve, reject, '/ip/hotspot/user/print')
+  //   })
+  // }
+  // async getActiveUsers(){
+  //   return new Promise(async (resolve, reject)=>{
+  //     await this.getParsedData(resolve, reject, '/ip/hotspot/active/print')
+  //   })
+  // }
+  // async getUserProfiles(){
+  //   return new Promise(async (resolve, reject)=>{
+  //     await this.getParsedData(resolve, reject, '/ip/hotspot/active/print')
+  //   })
+  // }
+  // async getAllHotspot(){
+  //   return new Promise(async (resolve, reject)=>{
+  //     await this.getParsedData(resolve, reject, '/ip/hotspot/print')
+  //   })
+  // }
+  // async getAllQueues(){
+  //   return new Promise(async (resolve, reject)=>{
+  //     await this.getParsedData(resolve, reject, '/queue/simple/print')
+  //   })
+  // }
   async getParsedData(resolve, reject, command){
     let data = await this.excuteApiCommand(command)
-    let parsed = api.parseItems(data)
-    resolve(parsed)
+    data.errors ? resolve(data) : resolve(api.parseItems(data))
+    // let parsed = api.parseItems(data)
+    // resolve(parsed)
   }
   async excuteApiCommand(command){
     var excute = (resolve, reject) => {
@@ -35,10 +69,11 @@ export default class InitialService {
             resolve(data)
           })
           .once('trap', (trap)=>{
-            log.debug('trap !! ::', trap)
+
+            resolve(trap)
           })
           .once('error', (error)=>{
-            log.debug('error !! ::', error)
+            resolve(error)
           })
         })
       })
