@@ -26,6 +26,6 @@ export default function (router) {
   // Same trick as the functional API, but using `makeClassInvoker`.
   const api = makeClassInvoker(QueueClass)
   router.get('/api/mikrotik/queues', api('getAllQueues'))
-  router.get('/api/mikrotik/queues/add', api('addQueue'))
-  router.get('/api/mikrotik/queues/delete', api('deleteQueue'))
+  router.post('/api/mikrotik/queues', api('addQueue'))
+  router.delete('/api/mikrotik/queues', api('deleteQueue'))
 }

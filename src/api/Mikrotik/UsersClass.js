@@ -13,15 +13,21 @@ class UsersClass {
     log.debug(users)
     ctx.ok(users)
   }
+
   async addUser(ctx){
     log.debug("adding user .. ")
     let user = ctx.request.body;
-    let res = await this.initialService.excutePostCommand(mainCommand, 'add', [
-      `=name=${user.name}`,
-      `=password=${user.password}`,
-      `=profile=${user.profile}`
-    ])
-    ctx.ok(res)
+    let data = []
+    !! user.username ? data.push(`=name=${user.username}`) : null
+    !! user.password ? data.push(`=password=${user.password}`) : null
+    !! user.profile ? data.push(`=profile=${user.profile}`) : null
+    !! user.server ? data.push(`=server=${user.server}`) : null
+    !! user.address ? data.push(`=address=${user.address}`) : null
+    !! user.macAddress ? data.push(`=mac-address=${user.macAddress}`) : null
+    !! user.email ? data.push(`=email=${user.email}`) : null
+    !! user.routes ? data.push(`=routes=${user.routes}`) : null
+    let res = await this.initialService.excutePostCommand(mainCommand, 'add', data);
+    ctx.ok(!!res[0] && !!res[0].ret ? `${user.name} added successfuly` : res)
   }
 
   async deleteUser(ctx){

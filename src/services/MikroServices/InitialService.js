@@ -56,8 +56,6 @@ export default class InitialService {
   async getParsedData(resolve, reject, command){
     let data = await this.excuteApiCommand(command)
     data.errors ? resolve(data) : resolve(api.parseItems(data))
-    // let parsed = api.parseItems(data)
-    // resolve(parsed)
   }
   async excuteApiCommand(command){
     var excute = (resolve, reject) => {
