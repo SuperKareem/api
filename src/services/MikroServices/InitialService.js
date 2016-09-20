@@ -63,14 +63,13 @@ export default class InitialService {
         let chan = conn.openChannel()
         conn.closeOnDone = true
         chan.write(command,()=>{
-          chan.on('done',(data)=>{
+          chan.on('done', data =>{
             resolve(data)
           })
-          .once('trap', (trap)=>{
-
+          .once('trap', trap =>{
             resolve(trap)
           })
-          .once('error', (error)=>{
+          .once('error', error =>{
             resolve(error)
           })
         })

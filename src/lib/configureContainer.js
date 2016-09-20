@@ -9,7 +9,9 @@ const modulesToLoad = [
   // This means that each request gets a separate instance
   // of a service.
   ['services/*.js', Lifetime.SCOPED],
+  ['services/db/*.js', Lifetime.SCOPED],
   ['services/MikroServices/*.js', Lifetime.SCOPED]
+
 ]
 
 /**

@@ -1,6 +1,7 @@
 import createServer from '../lib/createServer'
 import env from '../lib/env'
 import logger from '../lib/logger'
+import mongo from 'mongoose'
 
 const PORT = env.PORT || 1338
 
