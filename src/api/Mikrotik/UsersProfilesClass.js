@@ -1,11 +1,13 @@
 import { makeClassInvoker } from 'awilix-koa'
 import log from '../../lib/logger'
+import res from '../../lib/respond'
 
 const mainCommand = '/ip/hotspot/user/profile/'
 
 class ProfilesClass {
-  constructor ({ initialService }) {
+  constructor ({ initialService, dbService }) {
     this.initialService = initialService
+    this.db = dbService
   }
   filterData(profile, methodType){
     let data = []
@@ -26,9 +28,16 @@ class ProfilesClass {
     return data
   }
   async getAllProfiles(ctx) {
-    let profiles = await this.initialService.excuteGetCommand(mainCommand, 'print')
-    log.debug(profiles)
-    ctx.ok(profiles)
+    let {owner, networkId} = ctx.request.body
+    if(!!owner && !!networkId){
+      let network = await this.db.getAllUserNetworks(owner, networkId)
+      await this.initialService.createMikrotikConnection(network)
+      let profiles = await this.initialService.excuteGetCommand(mainCommand, 'print')
+      log.debug(profiles)
+      ctx.ok(res.ok({data: profiles}))
+    }else{
+      ctx.ok(res.fail({errors: 'no network owner or networkId', data: {error: true}}))
+    }
   }
 
   async addProfile(ctx){
@@ -58,7 +67,7 @@ class ProfilesClass {
 export default function (router) {
   // Same trick as the functional API, but using `makeClassInvoker`.
   const api = makeClassInvoker(ProfilesClass)
-  router.get('/api/mikrotik/users-profiles', api('getAllProfiles'))
+  router.post('/api/mikrotik/users-profiles/get', api('getAllProfiles'))
   router.post('/api/mikrotik/users-profiles', api('addProfile'))
   router.delete('/api/mikrotik/users-profiles', api('deleteProfile'))
   router.put('/api/mikrotik/users-profiles', api('updateProfile'))

@@ -1,13 +1,21 @@
-import log from '../../lib/logger'
+import logger from '../../lib/logger'
 import api from 'mikronode-ng'
+var log = logger.debug
 
 export default class InitialService {
   constructor () {
-    let mikroIP = '192.168.56.101';
-    let username = 'admin';
-    let password = '00'
-    this.server = api.getConnection(mikroIP, username, password)
-    log.debug(' .... connection established :) !!')
+    // let mikroIP = '192.168.56.101';
+    // let username = 'admin';
+    // let password = '00'
+  }
+  async createMikrotikConnection(network = {username, password, mikrotikIp}){
+    log('...Connecting to mikrotik')
+    this.server = await api.getConnection(
+      network.mikrotikIp,
+      network.username,
+      network.password
+    )
+    log(' .... connected to mikrotik server ....')
   }
   async excuteGetCommand(mainCommand, secondCommand){
     return new Promise(async (resolve, reject)=>{
@@ -22,6 +30,30 @@ export default class InitialService {
     return new Promise(async (resolve, reject)=>{
       await this.getParsedData(resolve, reject, command)
     })
+  }
+  async getParsedData(resolve, reject, command){
+    let data = await this.excuteApiCommand(command)
+    data.errors ? resolve(data) : resolve(api.parseItems(data))
+  }
+  async excuteApiCommand(command){
+    var excute = (resolve, reject) => {
+      this.server.connect((conn)=>{
+        let chan = conn.openChannel()
+        conn.closeOnDone = true
+        chan.write(command,()=>{
+          chan.on('done', data =>{
+            resolve(data)
+          })
+          .once('trap', trap =>{
+            resolve(trap)
+          })
+          .once('error', error =>{
+            resolve(error)
+          })
+        })
+      })
+    }
+    return new Promise(excute);
   }
   // async getInterfaces(){
   //   return new Promise(async (resolve, reject)=>{
@@ -53,28 +85,4 @@ export default class InitialService {
   //     await this.getParsedData(resolve, reject, '/queue/simple/print')
   //   })
   // }
-  async getParsedData(resolve, reject, command){
-    let data = await this.excuteApiCommand(command)
-    data.errors ? resolve(data) : resolve(api.parseItems(data))
-  }
-  async excuteApiCommand(command){
-    var excute = (resolve, reject) => {
-      this.server.connect((conn)=>{
-        let chan = conn.openChannel()
-        conn.closeOnDone = true
-        chan.write(command,()=>{
-          chan.on('done', data =>{
-            resolve(data)
-          })
-          .once('trap', trap =>{
-            resolve(trap)
-          })
-          .once('error', error =>{
-            resolve(error)
-          })
-        })
-      })
-    }
-    return new Promise(excute);
-  }
 }

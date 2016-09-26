@@ -1,9 +1,7 @@
 import { makeClassInvoker } from 'awilix-koa'
-import log from '../../lib/logger'
-var res = {
-  errors: 0,
-  data: {}
-}
+import logger from '../../lib/logger'
+import res from '../../lib/respond'
+var log = logger.debug
 class Users{
   constructor({ dbService }) {
     this.dbService = dbService
@@ -11,20 +9,15 @@ class Users{
   async checkUserExistance(ctx){
     var _user = ctx.request.body
     var user = await this.dbService.checkUserExistance(_user)
-    if(user.username == _user.username && user.password == _user.password){
-      res.errors = 0
-      res.data = {
-        isExist: true,
-        id: user._id
-      }
-      ctx.ok(res)
+    if(user){
+      ctx.ok(res.ok({
+        data: {
+          isExist: true,
+          user: user
+        }
+      }))
     } else {
-      res.errors = 1,
-      res.data = {
-        isExist: false,
-        error: 'user does not exist'
-      }
-      ctx.notFound(res)
+      ctx.ok(res.fail({errors: 'User Doesn\'t Exist', data: {isExist: false} }))
     }
   }
 }
