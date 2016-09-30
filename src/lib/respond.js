@@ -7,7 +7,7 @@ var good = ({msg, data}) => {
         data: {}
       }
     }
-   !!!msg ? msg = 'Good!' : null
+   !!!msg ? msg = 'good!' : null
    !!!data ? data = {} : null
    dataShape.res.msg = msg;
    dataShape.res.data = data;
@@ -22,10 +22,10 @@ var bad = ({errors, data}) =>{
       }
     }
   !!!errors ? errors = 1 : null
-  !!!data ? data = 'Bad !' : null
+  !!!data ? data = 'bad!' : null
   dataShape.errors = errors.length
-  dataShape.res.data = data
-  dataShape.res.msg = errors
+  dataShape.res.data = errors
+  dataShape.res.msg = data
   return dataShape;
 }
 
