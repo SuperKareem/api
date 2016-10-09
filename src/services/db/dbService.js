@@ -59,10 +59,10 @@ export default class DbService {
       _network.save((err)=>{
         log('... new network has been added')
         !err ? resolve(network) : resolve(err)
+        this.connection.close();
       })
     }
-    this.connection.close();
-    return new Promis(save)
+    return new Promise(save)
   }
 
   async addNewOffer(offer){
@@ -132,5 +132,38 @@ export default class DbService {
     }
     this.connection.close();
     return new Promise(save)
+  }
+  async getAllMikrotikUsers(){
+    !!this.connection.models ? this.createDbConnection() : null
+    var find = (resolve, reject) => {
+      let users = MikrotikUserModel(this.connection)
+      users.find({}, (err, users)=> {
+        !err ? resolve(users) : resolve(err)
+      })
+      this.connection.close();
+    }
+    return new Promise(find)
+  }
+  async updateMikrotikUser(user){
+    !!this.connection.models ? this.createDbConnection() : null
+    var find = (resolve, reject) => {
+      let dbUser = MikrotikUserModel(this.connection);
+      dbUser.update({username: user.username}, {...user}, (err, number, raw)=>{
+        !err ?  resolve(number) : resolve(err)
+      })
+      this.connection.close();
+    }
+    return new Promise(find)
+  }
+  async deleteMikrotikUser(user){
+    !!this.connection.models ? this.createDbConnection() : null
+    var _de = (resolve, reject) => {
+      let dbUser = MikrotikUserModel(this.connection)
+      dbUser.remove({username: user.name}, (err)=>{
+        !err ? resolve(err) : resolve("done")
+      })
+      this.connection.close();
+    }
+    return new Promise(_de)
   }
 }

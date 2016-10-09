@@ -2,6 +2,7 @@ import { makeClassInvoker } from 'awilix-koa'
 import log from '../../lib/logger'
 import res from '../../lib/respond'
 
+const broadbandCommand = '/ppp/profile/'
 const mainCommand = '/ip/hotspot/user/profile/'
 const IN_GB = 1073741824;
 
@@ -19,13 +20,16 @@ class ProfilesClass {
       return data
     }
     !! profile.name ? data.push(`=name=${profile.name}`) : null
+    !! profile.rateLimit ? data.push(`=rate-limit=${profile.rateLimit}`) : null
+    if(methodType == "broadband"){
+      return data
+    }
     !! profile.addressPool ? data.push(`=address-pool=${profile.addressPool}`) : null
     !! profile.sessionTimeout ? data.push(`=session-timeout=${sessionTimeout.sessionTimeout}`) : null
     !! profile.idleTimeout ? data.push(`=idle-timeout=${profile.idleTimeout}`) : null
     !! profile.keepAliveTimeout ? data.push(`=keepalive-timeout=${profile.keepAliveTimeout}`) : null
     !! profile.macAddress ? data.push(`=mac-address=${profile.macAddress}`) : null
     !! profile.sharedUsers ? data.push(`=shared-users=${profile.sharedUsers}`) : null
-    !! profile.rateLimit ? data.push(`=rate-limit=${profile.rateLimit}`) : null
     return data
   }
   getTrafficInGb(offers){
@@ -41,7 +45,6 @@ class ProfilesClass {
       await this.initialService.createMikrotikConnection(network)
       let offers = await this.db.getAllOffers(owner, networkId)
       this.getTrafficInGb(offers)
-      log.debug(offers)
       ctx.ok(res.ok({data: offers}))
     }else{
       ctx.ok(res.fail({errors: 'no network owner or networkId', data: {error: true}}))
@@ -58,6 +61,9 @@ class ProfilesClass {
       let data = this.filterData(profile, 'post')
       let mkRes = await this.initialService.excutePostCommand(mainCommand, 'add', data);
       if(!!mkRes[0] && !!mkRes[0].ret){
+        let data2 = this.filterData(profile, 'broadband')
+        await this.initialService.createMikrotikConnection(network)
+        let mkRes2 = await this.initialService.excutePostCommand(broadbandCommand, 'add', data2);
         profile.downloadLimit = profile.downloadLimit * IN_GB
         profile.uploadLimit = profile.uploadLimit * IN_GB
         let offer = await this.db.addNewOffer(profile)

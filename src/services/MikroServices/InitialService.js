@@ -7,9 +7,9 @@ export default class InitialService {
     // let mikroIP = '192.168.56.101';
     // let username = 'admin';
     // let password = '00'
+    log('...Connecting to mikrotik')
   }
   async createMikrotikConnection(network = {username, password, mikrotikIp}){
-    log('...Connecting to mikrotik')
     this.server = await api.getConnection(
       network.mikrotikIp,
       network.username,
@@ -39,7 +39,7 @@ export default class InitialService {
     var excute = (resolve, reject) => {
       this.server.connect((conn)=>{
         let chan = conn.openChannel()
-        conn.closeOnDone = true
+        conn.closeOnDone=true
         chan.write(command,()=>{
           chan.on('done', data =>{
             resolve(data)
@@ -55,34 +55,4 @@ export default class InitialService {
     }
     return new Promise(excute);
   }
-  // async getInterfaces(){
-  //   return new Promise(async (resolve, reject)=>{
-  //     await this.getParsedData(resolve, reject, '/ip/address/print')
-  //   })
-  // }
-  // async getAllUsers(){
-  //   return new Promise(async (resolve, reject)=>{
-  //     await this.getParsedData(resolve, reject, '/ip/hotspot/user/print')
-  //   })
-  // }
-  // async getActiveUsers(){
-  //   return new Promise(async (resolve, reject)=>{
-  //     await this.getParsedData(resolve, reject, '/ip/hotspot/active/print')
-  //   })
-  // }
-  // async getUserProfiles(){
-  //   return new Promise(async (resolve, reject)=>{
-  //     await this.getParsedData(resolve, reject, '/ip/hotspot/active/print')
-  //   })
-  // }
-  // async getAllHotspot(){
-  //   return new Promise(async (resolve, reject)=>{
-  //     await this.getParsedData(resolve, reject, '/ip/hotspot/print')
-  //   })
-  // }
-  // async getAllQueues(){
-  //   return new Promise(async (resolve, reject)=>{
-  //     await this.getParsedData(resolve, reject, '/queue/simple/print')
-  //   })
-  // }
 }

@@ -8,7 +8,7 @@ export default function UserModel(connection){
     profile: String,
     accountType: String,
     macAddress: String,
-    mob: String,
+    mobile: String,
     currentOffer: String,
     balance: Number,
     offerHasEnd: Boolean,

@@ -13,19 +13,14 @@ var good = ({msg, data}) => {
    dataShape.res.data = data;
    return dataShape;
 }
-var bad = ({errors, data}) =>{
+var bad = ({msg, data}) =>{
   let dataShape = {
-      errors: 0,
+      errors: 1,
       res: {
-        msg: '',
-        data: {}
+        msg: !!msg ? msg : 'bad!',
+        data: data
       }
     }
-  !!!errors ? errors = 1 : null
-  !!!data ? data = 'bad!' : null
-  dataShape.errors = errors.length
-  dataShape.res.data = errors
-  dataShape.res.msg = data
   return dataShape;
 }
 
