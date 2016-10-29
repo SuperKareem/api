@@ -1,7 +1,6 @@
 import { makeClassInvoker } from 'awilix-koa'
-import log from '../../lib/logger'
+import logger from '../../lib/logger'
 import res from '../../lib/respond'
-
 const broadbandCommand = '/ppp/profile/'
 const mainCommand = '/ip/hotspot/user/profile/'
 const IN_GB = 1073741824;
@@ -40,7 +39,7 @@ class ProfilesClass {
   }
   async getAllProfiles(ctx) {
     let {owner, networkId} = ctx.request.body
-    if(!!owner && !!networkId){
+    if(!!networkId){
       let network = await this.db.getAllUserNetworks(owner, networkId)
       await this.initialService.createMikrotikConnection(network)
       let offers = await this.db.getAllOffers(owner, networkId)
@@ -51,7 +50,7 @@ class ProfilesClass {
     }
   }
   async addProfile(ctx){
-    log.debug("adding profile .. ")
+    logger.debug("adding profile .. ")
     let profile = ctx.request.body;
     let {owner, networkId} = ctx.request.body
     if(!!owner && !!networkId){
@@ -67,6 +66,13 @@ class ProfilesClass {
         profile.downloadLimit = profile.downloadLimit * IN_GB
         profile.uploadLimit = profile.uploadLimit * IN_GB
         let offer = await this.db.addNewOffer(profile)
+        await this.db.addNewLog({
+          action: 'add',
+          user: 'admin',
+          type: 'offer',
+          networkId: networkId,
+          data: profile.name
+        })
         ctx.ok(res.ok({data: offer}))
       } else {
         ctx.ok(res.fail({errors: 'failed to addd profile to mikrotik server', data: {error: true}}))
@@ -78,19 +84,45 @@ class ProfilesClass {
   }
 
   async updateProfile(ctx){
-    log.debug("updating profile .. ")
+    logger.debug("updating profile .. ")
     let profile = ctx.request.body;
     let data = this.filterData(profile, 'put')
     let res = await this.initialService.excutePostCommand(mainCommand, 'set', data);
+    await this.db.addNewLog({
+      action: 'edit',
+      user: 'admin',
+      type: 'offer',
+      networkId: networkId,
+      data: profile.name
+    })
     ctx.ok(!!res[0] && !!res[0].ret ? `${profile.name} added successfuly` : res)
   }
   async deleteProfile(ctx){
-    log.debug("Delteing profile .. ")
-    let profile = ctx.request.body;
+    logger.debug("Delteing profile .. ")
+    let {profile, networkId, owner} = ctx.request.body;
+    if(!!networkId && !!owner){
+      // ctx.ok(res.fail({errors: 'netowrk does not exist !!'}))
+      // return
+    }
+    let dbRes = await this.db.deleteProfile(profile);
+    logger.debug(dbRes)
+    profile.currentName = profile.name
     let data = this.filterData(profile, 'delete')
-    let res = await this.initialService.excutePostCommand(mainCommand, 'remove', data)
-    ctx.ok(res)
+    logger.debug(data)
+    let network = await this.db.getAllUserNetworks(owner, networkId)
+    await this.initialService.createMikrotikConnection(network)
+    let mkRes = await this.initialService.excutePostCommand(mainCommand, 'remove', data)
+    logger.debug(mkRes)
+    await this.db.addNewLog({
+      action: 'delete',
+      user: 'admin',
+      type: 'offer',
+      networkId: networkId,
+      data: profile.name
+    })
+    ctx.ok(res.ok({msg: "deleted"}))
   }
+
 }
 
 export default function (router) {

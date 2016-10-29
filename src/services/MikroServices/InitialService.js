@@ -1,23 +1,25 @@
 import logger from '../../lib/logger'
 import api from 'mikronode-ng'
-var log = logger.debug
 
 export default class InitialService {
   constructor () {
     // let mikroIP = '192.168.56.101';
     // let username = 'admin';
     // let password = '00'
-    log('...Connecting to mikrotik')
+    logger.debug('...Connecting to mikrotik')
   }
   async createMikrotikConnection(network = {username, password, mikrotikIp}){
     this.server = await api.getConnection(
       network.mikrotikIp,
       network.username,
       network.password
-    )
-    log(' .... connected to mikrotik server ....')
+    ).on('error', (err)=>{
+      logger.debug("**** error connecting to mikrotik Server ****")
+    })
+    logger.debug(' .... connected to mikrotik server ....')
   }
   async excuteGetCommand(mainCommand, secondCommand){
+    logger.debug(mainCommand + secondCommand)
     return new Promise(async (resolve, reject)=>{
       await this.getParsedData(resolve, reject, mainCommand + secondCommand)
     })
@@ -27,6 +29,7 @@ export default class InitialService {
       mainCommand+secondCommand,
       ...data
     ]
+    logger.debug(command)
     return new Promise(async (resolve, reject)=>{
       await this.getParsedData(resolve, reject, command)
     })

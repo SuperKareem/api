@@ -7,10 +7,10 @@ export default function OffersModel(connection){
     uploadSpeed: String,
     downloadLimit: String,
     uploadLimit: String,
-    offerLifetime: String,
+    offerLifetime: Number,
     owner: String,
     networkId: String,
-    offerPrice: String,
+    offerPrice: Number,
     limitEndOffer: String,
   })
   return connection.model('offers', _offer)

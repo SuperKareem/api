@@ -10,8 +10,10 @@ export default function UserModel(connection){
     macAddress: String,
     mobile: String,
     currentOffer: String,
-    balance: Number,
-    offerHasEnd: Boolean,
+    balance: {type: Number, default: 0},
+    offerHasEnd: {type: Boolean, default: true},
+    networkId: String,
+    offerEndDate: Date
   })
   return connection.model('mikrotikUser', _mikrotikUser)
 }

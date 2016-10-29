@@ -8,6 +8,7 @@ class Users{
   }
   async checkUserExistance(ctx){
     var _user = ctx.request.body
+    log(_user)
     var user = await this.dbService.checkUserExistance(_user)
     if(user){
       ctx.ok(res.ok({
@@ -25,7 +26,4 @@ export default function (router) {
   // Same trick as the functional API, but using `makeClassInvoker`.
   const api = makeClassInvoker(Users)
   router.post('/api/system/users/check', api('checkUserExistance'))
-  // router.post('/api/system/users-profiles', api('addProfile'))
-  // router.delete('/api/system/users-profiles', api('deleteProfile'))
-  // router.put('/api/system/users-profiles', api('updateProfile'))
 }
