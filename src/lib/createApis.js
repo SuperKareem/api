@@ -11,4 +11,12 @@ export default function createApis (router) {
   result.forEach(
     m => require(m.path).default(router)
   )
+  const mikrotik = listModules('../api/mikrotik/*.js', { cwd: __dirname })
+  mikrotik.forEach(
+    m => require(m.path).default(router)
+  )
+  const system = listModules('../api/system/*.js', { cwd: __dirname })
+  system.forEach(
+    m => require(m.path).default(router)
+  )
 }
