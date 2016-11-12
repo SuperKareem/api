@@ -17,15 +17,22 @@ createServer().then(app => {
     let mikro = new mikrotik()
 
     let networks = await db.getAllNetworks()
-    for (let i = 0; i < networks.length; i++) {
-      await mikro.createMikrotikConnection(networks[i])
-      logger.debug()
+    for (let x = 0; x < networks.length; x++) {
+      await mikro.createMikrotikConnection(networks[x])
       let activeUsers = await mikro.excuteGetCommand(mainCommand, 'print')
-      logger.debug("mkRes : ", activeUsers)
-      for (let x = 0; x < activeUsers.length; x++) {
-        await mikro.createMikrotikConnection(networks[i])
-        let mkRes = await mikro.excutePostCommand(mainCommand, command, [`=numbers=${x}`])
-        logger.debug("mkRes : ", mkRes)
+      if(activeUsers.length < 1)
+        break;
+      let dbUsers = await db.getAllMikrotikUsers();
+      for (var j = 0; j < activeUsers.length; j++) {
+        for (var i = 0; i < dbUsers.length; i++) {
+          if(activeUsers[j].username == dbUsers[i].username && dbUsers[i].offerEndDate > Date()){
+            dbUser[i].offerHasEnd = true
+            await db.updateMikrotikUser(dbUser[i])
+            await mikro.createMikrotikConnection(networks[i])
+            let mkRes = await mikro.excutePostCommand(mainCommand, command, [`=numbers=${activeUsers[j]}`])
+            logger.debug("mkRes : ", activeUsers[j])
+          }
+        }
       }
     }
   }
